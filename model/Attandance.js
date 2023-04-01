@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const attendanceSchema = new Schema({
     course_id: {
         type: Schema.Types.ObjectId,
-        ref: 'Course'
+        ref: 'Course',
     },
     date: Date,
     attendance: [{
