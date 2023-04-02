@@ -51,6 +51,9 @@ app.get('/logout', (req, res) => {
     });
 });
 
+app.get('/profile', (req,res) =>{
+    res.render('profile');
+})
 
 app.get('/home', checkAuth, (req, res) => {
     if (req.user.role == "teacher")
