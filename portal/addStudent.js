@@ -11,10 +11,7 @@ const Student = require('../model/student');
 var randomstring = require("randomstring");
 const sendMail = require("../controller/sendMail")
 const emailTemplate = require('../controller/emailTemplate');
-const teacher = require('../model/teacher');
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+const attandance = require('./attandance');
 
 function checkAuth(req, res, next) {
     if (req.isAuthenticated()) {
@@ -37,7 +34,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.get('/addCourse', checkAuth,  async(req, res) => {
+app.get('/addCourse', checkAuth, async (req, res) => {
     if (req.user.role == "teacher") {
         let oldteacher = await Teacher.findOne({ email: req.user.email });
         if (oldteacher) {
@@ -81,11 +78,11 @@ app.post('/uploadStudentsheet', upload.single('file'), async (req, res) => {
         { new: true }
     );
 
-    await addStudents(students, newCourse,profData);
+    await addStudents(students, newCourse, profData);
     res.json("Student added");
 });
 
-async function addStudents(students, newCourse,profData) {
+async function addStudents(students, newCourse, profData) {
     return new Promise(async (Resolve, Reject) => {
         for (let index = 0; index < students.length; index++) {
             let student = students[index];
@@ -106,6 +103,7 @@ async function addStudents(students, newCourse,profData) {
             if (!newStudent) {
                 newStudent = await Student.create({
                     name: student.name,
+                    rollno: student.rollno,
                     email: student.email,
                     courses: [newCourse._id],
                 });
@@ -122,10 +120,12 @@ async function addStudents(students, newCourse,profData) {
                 { $push: { students: newStudent._id } },
                 { new: true }
             );
-            await sendMail.sendNewStudentEnrollmentMsz(student.email, emailTemplate.courseRegisterEmail(newCourse.name,profData.name));
+            await sendMail.sendNewStudentEnrollmentMsz(student.email, emailTemplate.courseRegisterEmail(newCourse.name, profData.name));
         }
         Resolve();
     })
 }
+
+app.use(attandance);
 
 module.exports = app;

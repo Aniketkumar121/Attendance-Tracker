@@ -121,8 +121,9 @@ hr {
     padding: 13px 0;
     height: 2.6rem;
     background-color: #abb8c0;
-    position: sticky;
     bottom: 0;
+    position: fixed;
+    width: 100%;
 }
 
 .foot i {
