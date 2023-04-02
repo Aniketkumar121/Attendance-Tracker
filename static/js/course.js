@@ -1,59 +1,48 @@
-window.onload = async () => {
-    let allCourses = await getCourses();
-    allCourses.forEach((course, index) => {
+window.onload = () => {
+    let course_id = document.getElementById('course_id').value;
+    let course = sessionStorage.getItem(`${course_id}`);
+    if (course) {
+        course = JSON.parse(course);
         totalPresent = calculate_attandance(course.attandance);
         totalDay = course.attandance.length;
-
-        // Create wrapper element for the chart
-        const chartWrapper = document.createElement('div');
-        chartWrapper.classList.add('chart');
-
-        // Add canvas element to the chart wrapper
-        const canvasElement = document.createElement('canvas');
-        canvasElement.id = `myChart${index}`;
-        chartWrapper.appendChild(canvasElement);
-
-        // Add percent and course name to the chart wrapper
-        const percentElement = document.createElement('h3');
-        percentElement.classList.add('percent');
-        percentElement.textContent = `${Math.ceil((totalPresent / totalDay) * 100)}%`;
-        chartWrapper.appendChild(percentElement);
-
-        const subElement = document.createElement('h4');
-        subElement.classList.add('sub');
-        subElement.textContent = course.course.name;
-        chartWrapper.appendChild(subElement);
-
-        // Add the chart wrapper to both the charts and subjects elements
-        document.getElementsByClassName('charts')[0].appendChild(chartWrapper);
-
-        const subsWrapper = document.createElement('div');
-        subsWrapper.classList.add('subs');
-        subsWrapper.id = course.course._id;
-        subsWrapper.textContent = course.course.name;
-        document.getElementsByClassName('subjects')[0].appendChild(subsWrapper);
-
-        // Create the chart using the canvas element
-        const ctx = canvasElement.getContext('2d');
+        console.log(course);
+        document.getElementById('sub-name').innerHTML = course.course.name;
+        document.getElementsByClassName('chart')[0].innerHTML = `<canvas width="230px" height="230px" id="myChart"></canvas>`
+        const ctx = document.getElementById('myChart');
         new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: [],
                 datasets: [{
-                    label: 'My First Dataset',
+                    label: 'Attandance',
                     data: [totalPresent, totalDay - totalPresent],
                     backgroundColor: [
-                        'rgb(54, 162, 235)',
-                        'rgb(255, 99, 132)',
+                        '#16FF00',
+                        'rgb(224 59 59)'
                     ],
-                    hoverOffset: 4
+                    hoverOffset: 20
                 }]
-            },
+            }
         });
-    });
-    console.log(allCourses);
-}
+        document.getElementById('pt').innerHTML = ` Present <br>
+                    ${Math.ceil((totalPresent / totalDay) * 100)}%`
+        document.getElementById('at').innerHTML = `Absent <br>
+        ${100 - Math.ceil((totalPresent / totalDay) * 100)}%
+        `
+        var events = [];
+        for (let i = 0; i < course.attandance.length; i++) {
+            events.push({
+                'Date': new Date(course.attandance[i].date),
+                Title: course.attandance[i].isPresent ? "Present" : "Absent"
+            })
+        }
+        var settings = {};
+        var element = document.getElementById('caleandar');
+        caleandar(element, events, settings);
+    }
+    else {
 
+    }
+}
 
 function calculate_attandance(attandance) {
     let total_present = 0;
@@ -61,22 +50,4 @@ function calculate_attandance(attandance) {
         total_present += day.isPresent;
     })
     return total_present;
-}
-
-function getCourses() {
-    return new Promise((Resolve, Reject) => {
-        console.log("gooo");
-        xhr = new XMLHttpRequest();
-        xhr.open('GET', `/StudentCourses`, true);
-        // xhr.setRequestHeader('X-CSRF-TOKEN', document.getElementById('myform').children[0].value);
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                var response = JSON.parse(xhr.response);
-                return Resolve(response);
-            } else {
-                return Reject("error");
-            }
-        };
-        xhr.send();
-    })
 }

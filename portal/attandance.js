@@ -90,5 +90,10 @@ const getAttandance = async (studentId, courseId) => {
 
 
 
+app.get('/course', (req, res) => {
+    res.render('course', { course_id: req.query.subject });
+})
+
+
 
 module.exports = app;
